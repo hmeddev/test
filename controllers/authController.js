@@ -33,7 +33,6 @@ const signup = async (req, res) => {
 
 // Login controller
 const login = async (req, res) => {
-   console.log("req.body")
   const { username, password } = req.body;
 
   const userRef = db.ref('users').orderByChild('username').equalTo(username);

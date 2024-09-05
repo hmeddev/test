@@ -13,7 +13,6 @@ const validateSignup = (req, res, next) => {
 };
 
 const validateLogin = (req, res, next) => {
-  console.log(req.body)
   const schema = Joi.object({
     username: Joi.string().required(),
     password: Joi.string().required()
