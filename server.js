@@ -27,8 +27,8 @@ app.use(session({
 }));
 
 // CSRF Protection
-const csrfProtection = csrf({ cookie: true });
-app.use(csrfProtection);
+const csrfProtection = csrf({ cookie: false });
+//app.use(csrfProtection);
 
 // Routes
 app.use('/auth', authRoutes);
