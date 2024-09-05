@@ -16,14 +16,29 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(bodyParser.json());
 app.use(cookieParser());
-app.use(helmet());
+app.use(helmet({
+    contentSecurityPolicy: false, // إذا كنت تستخدم ميزات معينة قد تتعارض مع CSP مثل Google Fonts أو APIs
+    referrerPolicy: { policy: "no-referrer" },
+    hsts: {
+        maxAge: 31536000,  // تفعيل HSTS لمدة سنة (أمان أعلى للـ HTTPS)
+        includeSubDomains: true,  // يشمل جميع النطاقات الفرعية
+        preload: true
+    }
+}));
+
 app.use(cors());
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'your_session_secret',
+    secret: 'session_secret_key',
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: process.env.NODE_ENV === 'production', httpOnly: true, maxAge: 60000 }
+    cookie: { 
+        secure: true,   // تأكد من أن الجلسة تستخدم HTTPS
+        httpOnly: true, // تأمين الكوكيز لمنع الوصول إليها عبر JavaScript
+        sameSite: 'strict', // الحماية من الهجمات عبر المواقع المشتركة
+        maxAge: 60000  // مدة الجلسة (بالميلي ثانية)
+    }
 }));
+
 app.use(csurf({ cookie: true }));
 
 // الحد من الطلبات
@@ -40,7 +55,9 @@ app.post('/token', refreshToken);
 app.post('/logout', logout);
 app.put('/update', authenticate, updateUserData);
 app.get('/user', authenticate, getUserData);
-
+app.get('/', (req, res) => {
+    res.send(':)');
+});
 // بدء الخادم
 app.listen(PORT, () => {
     console.log(`الخادم يعمل على http://localhost:${PORT}`);
