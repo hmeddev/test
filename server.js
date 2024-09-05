@@ -27,12 +27,13 @@ app.use(session({
 }));
 
 // CSRF Protection
-const csrfProtection = csrf({ cookie: false });
-//app.use(csrfProtection);
+const csrfProtection = csrf({ cookie: true });
+app.use(csrfProtection);
 
 // Routes
 app.use('/auth', authRoutes);
 app.use('/user', loginLimiter, userRoutes);
+
 
 // Start Server
 app.listen(PORT, () => {
