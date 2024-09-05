@@ -6,6 +6,6 @@ admin.initializeApp({
   databaseURL: "https://theai-bot-default-rtdb.europe-west1.firebasedatabase.app"
 });
 
-const db = admin.database();
+const db = admin;
 
-
+module.exports = db;

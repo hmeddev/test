@@ -9,13 +9,7 @@ const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
 
 // Firebase Admin SDK
-const admin = require('firebase-admin');
-const serviceAccount = require('./admin.json');
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://theai-bot-default-rtdb.europe-west1.firebasedatabase.app"
-});
 
 const app = express();
 const PORT = process.env.PORT || 3000;

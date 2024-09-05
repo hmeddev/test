@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
-const admin = require('firebase-admin');
+const admin = require('../firebase');
 const db = admin.database();
 
 // Signup controller
