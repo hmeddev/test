@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(helmet());
-app.use(cors({ origin: ['https://your-frontend.com'], credentials: true }));
+app.use(cors({ origin: ['upbeat-hickory-expansion.glitch.me'], credentials: true }));
 app.use(cookieParser());
 app.use(express.json());
 app.use(session({
