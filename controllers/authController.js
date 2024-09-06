@@ -64,6 +64,7 @@ const login = async (req, res) => {
 
 // Refresh token controller
 const refreshToken = (req, res) => {
+  console.log("hmed-1")
   const { refreshToken } = req.body;
   if (!refreshToken) {
     return res.status(403).json({ status: false, error: 'Refresh token missing.' });
