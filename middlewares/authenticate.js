@@ -1,16 +1,24 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
 const authenticate = (req, res, next) => {
   const authHeader = req.headers.authorization;
-  
+
   if (!authHeader) {
-    return res.status(401).json({ error: 'Authentication token missing.' });
+    return res
+      .status(401)
+      .json({ status: false, error: "Authentication token missing." });
   }
 
-  const token = authHeader.split(' ')[1];
+  const token = authHeader.split(" ")[1];
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ error: 'Invalid token.' });
-    
+    if (err) {
+      if (err.name === "TokenExpiredError") {
+        // إذا انتهت صلاحية التوكن، نعيد رسالة مناسبة
+        return res.status(401).json({ status: false, error: "Token expired." });
+      }
+      return res.status(403).json({ status: false, error: "Invalid token." });
+    }
+
     req.user = user;
     next();
   });
