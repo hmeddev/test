@@ -4,6 +4,7 @@ const db = admin.database();
 
 // Get games controller
 const getgames = (req, res) => {
+  console.log("games")
   const gamesRef = db.ref('games/');
 
   gamesRef.once('value', snapshot => {
