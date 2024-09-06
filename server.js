@@ -36,7 +36,7 @@ app.use(session({
 // });
 // Routes
 app.use('/auth', authRoutes);
-app.use('/game', authRoutes);
+app.use('/game', gameRoutes);
 app.use('/user', loginLimiter, userRoutes);
 
 

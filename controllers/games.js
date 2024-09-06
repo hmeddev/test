@@ -4,7 +4,7 @@ const db = admin.database();
 
 // Get games controller
 const getgames = (req, res) => {
-  const gamesRef = db.ref('users/' + req.user.uid);
+  const gamesRef = db.ref('games/');
 
   gamesRef.once('value', snapshot => {
     if (!snapshot.exists()) {
