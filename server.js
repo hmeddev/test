@@ -6,6 +6,7 @@ const session = require('express-session');
 const csrf = require('csurf');
 const { loginLimiter } = require('./middlewares/rateLimit');
 const authRoutes = require('./routes/auth');
+const gameRoutes = require('./routes/game');
 const userRoutes = require('./routes/user');
 
 // Firebase Admin SDK
@@ -35,6 +36,7 @@ app.use(session({
 // });
 // Routes
 app.use('/auth', authRoutes);
+app.use('/game', authRoutes);
 app.use('/user', loginLimiter, userRoutes);
 
 
