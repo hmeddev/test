@@ -14,7 +14,7 @@ const authenticate = (req, res, next) => {
     if (err) {
       if (err.name === "TokenExpiredError") {
         // إذا انتهت صلاحية التوكن، نعيد رسالة مناسبة
-        return res.status(401).json({ status: false, error: "Token expired." });
+        return res.status(401).json({ status: false, error: "Token expired" });
       }
       return res.status(403).json({ status: false, error: "Invalid token." });
     }
