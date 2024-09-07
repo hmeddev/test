@@ -58,7 +58,7 @@ const login = async (req, res) => {
     const refreshTokenEntry = { token: refreshToken, uid: user.uid };
     db.ref('refreshTokens/' + uuidv4()).set(refreshTokenEntry);
 
-    res.json({ status: true, message: 'Login successful!', token, refreshToken });
+    res.json({ status: true, message: 'Login successful!', token, refreshToken,uid:user.uid });
   });
 };
 
