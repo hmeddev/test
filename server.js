@@ -39,6 +39,14 @@ app.use('/auth', authRoutes);
 app.use('/game', gameRoutes);
 app.use('/user', loginLimiter, userRoutes);
 
+app.post('/webhook', (req, res) => {
+    const event = req.body;
+
+    // عالج البيانات الواردة هنا
+    console.log('Received webhook event:', event);
+
+    res.status(200).send('Event received');
+});
 
 // Start Server
 app.listen(PORT, () => {
