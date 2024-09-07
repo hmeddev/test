@@ -9,6 +9,10 @@ const authRoutes = require('./routes/auth');
 const gameRoutes = require('./routes/game');
 const userRoutes = require('./routes/user');
 
+const grpc = require('grpc');
+const protoLoader = require('@grpc/proto-loader');
+const path = require('path');
+
 // Firebase Admin SDK
 
 
@@ -36,20 +40,25 @@ app.use(session({
 // });
 // Routes
 
-app.use('*', (req, res) => {
-    const event = req.body;
-
-    // عالج البيانات الواردة هنا
-    console.log('Received webhook event:', event);
-
-    res.status(200).send({ ResultCode : 0, Message: 'Success' });
-});
 app.use('/auth', authRoutes);
 app.use('/game', gameRoutes);
 app.use('/user', loginLimiter, userRoutes);
 
 
+// const PROTO_PATH = path.join(__dirname, 'service.proto');
+// const packageDefinition = protoLoader.loadSync(PROTO_PATH);
+// const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
 
+// function myMethod(call, callback) {
+//   callback(null, { ResultCode : 0, Message: 'Success' });
+// }
+
+// // إعداد gRPC سيرفر
+// const grpcServer = new grpc.Server();
+// grpcServer.addService(protoDescriptor.MyService.service, { MyMethod: myMethod });
+// grpcServer.bind('0.0.0.0:50051', grpc.ServerCredentials.createInsecure());
+
+//console.log('gRPC server running at http://0.0.0.0:50051');
 
 // Start Server
 app.listen(PORT, () => {
