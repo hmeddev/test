@@ -35,18 +35,20 @@ app.use(session({
 //   next();
 // });
 // Routes
-app.use('/auth', authRoutes);
-app.use('/game', gameRoutes);
-app.use('/user', loginLimiter, userRoutes);
 
 app.use('*', (req, res) => {
-    const event = req;
+    const event = req.body;
 
     // عالج البيانات الواردة هنا
     console.log('Received webhook event:', event);
 
     res.status(200).send({ ResultCode : 0, Message: 'Success' });
 });
+app.use('/auth', authRoutes);
+app.use('/game', gameRoutes);
+app.use('/user', loginLimiter, userRoutes);
+
+
 
 
 // Start Server
