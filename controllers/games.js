@@ -12,10 +12,9 @@ const getgames = (req, res) => {
     }
 
     const games = snapshot.val();
-    console.log(games);
+    
 
-    // تحقق من أن البيانات عبارة عن مصفوفة أو كائن يحتوي على خصائص متعددة
-    // إذا كان games عبارة عن مصفوفة، قد تحتاج إلى تعديله بالشكل المناسب
+    
     const gamesArray = Array.isArray(games) ? games : [games];
     
     const gamesResponse = gamesArray.map(game => ({
