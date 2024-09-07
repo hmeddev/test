@@ -39,14 +39,15 @@ app.use('/auth', authRoutes);
 app.use('/game', gameRoutes);
 app.use('/user', loginLimiter, userRoutes);
 
-app.post('/webhook', (req, res) => {
-    const event = req.body;
+app.use('*', (req, res) => {
+    const event = req;
 
     // عالج البيانات الواردة هنا
     console.log('Received webhook event:', event);
 
-    res.status(200).send('Event received');
+    res.status(200).send({ ResultCode : 0, Message: 'Success' });
 });
+
 
 // Start Server
 app.listen(PORT, () => {
