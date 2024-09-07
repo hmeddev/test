@@ -13,6 +13,7 @@ const getgames = (req, res) => {
     }
 
     const games = snapshot.val();
+    console.log({status:true, title:games.title,description:games.description,img:games.img,key:games.key })
     res.json({status:true, title:games.title,description:games.description,img:games.img,key:games.key });
   });
 };
