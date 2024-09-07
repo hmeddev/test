@@ -1,20 +1,31 @@
 const admin = require('../firebase');
 const db = admin.database();
 
-
 // Get games controller
 const getgames = (req, res) => {
-  console.log("games")
+  console.log("games");
   const gamesRef = db.ref('games/');
 
   gamesRef.once('value', snapshot => {
     if (!snapshot.exists()) {
-      return res.status(404).json({status:false, error: 'games not found.' });
+      return res.status(404).json({status: false, error: 'games not found.'});
     }
 
     const games = snapshot.val();
-    console.log({status:true, title:games.title,description:games.description,img:games.img,key:games.key })
-    res.json({status:true, title:games.title,description:games.description,img:games.img,key:games.key });
+    console.log(games);
+
+    // تحقق من أن البيانات عبارة عن مصفوفة أو كائن يحتوي على خصائص متعددة
+    // إذا كان games عبارة عن مصفوفة، قد تحتاج إلى تعديله بالشكل المناسب
+    const gamesArray = Array.isArray(games) ? games : [games];
+    
+    const gamesResponse = gamesArray.map(game => ({
+      title: game.title || 'No title',
+      description: game.description || 'No description',
+      img: game.img || 'No image',
+      key: game.key || 'No key'
+    }));
+
+    res.json({status: true, games: gamesResponse});
   });
 };
 
