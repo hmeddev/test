@@ -13,15 +13,16 @@ const getgames = (req, res) => {
 
     const games = snapshot.val();
     
-
-    
+    // تحويل البيانات إلى مصفوفة إذا لم تكن مصفوفة
     const gamesArray = Array.isArray(games) ? games : [games];
     
-    const gamesResponse = gamesArray.map(game => ({
+    // إضافة تسلسل لكل لعبة
+    const gamesResponse = gamesArray.map((game, index) => ({
       title: game.title || 'No title',
       description: game.description || 'No description',
       img: game.img || 'No image',
-      key: game.key || 'No key'
+      key: game.key || 'No key',
+      index: index + 1
     }));
 
     res.json({status: true, games: gamesResponse});
