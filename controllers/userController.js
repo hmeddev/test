@@ -20,15 +20,16 @@ const updateUser = (req, res) => {
 // Get user controller
 const getUser = (req, res) => {
   const userRef = db.ref('users/' + req.user.uid);
-
+console.log("user")
   userRef.once('value', snapshot => {
     if (!snapshot.exists()) {
       return res.status(404).json({status:false, error: 'User not found.' });
+      console.log("user-error")
     }
 
     const user = snapshot.val();
     res.json({status:true, uid: user.uid, username: user.username, role: user.role });
-    console.log({status:true, uid: user.uid, username: user.username, role: user.role })
+    console.log("user-done")
   });
 };
 
