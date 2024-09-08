@@ -6,6 +6,7 @@ service MyService {
 
 message MyRequest {
   string name = 1;
+  int AppId = 0;
 }
 
 message MyResponse {
