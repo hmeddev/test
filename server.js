@@ -28,7 +28,7 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'default_session_secret',
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false, httpOnly: true, maxAge: 60000 }
+  cookie: { secure: true, httpOnly: true, maxAge: 60000 }
 }));
 
 // CSRF Protection
@@ -45,20 +45,20 @@ app.use('/game', gameRoutes);
 app.use('/user', loginLimiter, userRoutes);
 
 
-// const PROTO_PATH = path.join(__dirname, 'service.proto');
-// const packageDefinition = protoLoader.loadSync(PROTO_PATH);
-// const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
+const PROTO_PATH = path.join(__dirname, 'service.proto');
+const packageDefinition = protoLoader.loadSync(PROTO_PATH);
+const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
 
-// function myMethod(call, callback) {
-//   callback(null, { ResultCode : 0, Message: 'Success' });
-// }
+function myMethod(call, callback) {
+  callback(null, { ResultCode : 0, Message: 'Success' });
+}
 
 // // إعداد gRPC سيرفر
-// const grpcServer = new grpc.Server();
-// grpcServer.addService(protoDescriptor.MyService.service, { MyMethod: myMethod });
-// grpcServer.bind('0.0.0.0:50051', grpc.ServerCredentials.createInsecure());
-
-//console.log('gRPC server running at http://0.0.0.0:50051');
+const grpcServer = new grpc.Server();
+grpcServer.addService(protoDescriptor.MyService.service, { MyMethod: myMethod });
+grpcServer.bind('0.0.0.0:50051', grpc.ServerCredentials.createInsecure());
+grpcServer.start();
+console.log('gRPC server running at http://0.0.0.0:50051');
 
 // Start Server
 app.listen(PORT, () => {
