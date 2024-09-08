@@ -13,6 +13,7 @@ const signup = async (req, res) => {
   userRef.once('value', async snapshot => {
     if (snapshot.exists()) {
       return res.status(400).json({ status: false, error: 'Username already exists.' });
+       console.log({ status: false, error: 'Username already exists.' })
     }
 
     // Hash password
@@ -28,6 +29,7 @@ const signup = async (req, res) => {
     });
 
     res.status(201).json({ status: true, message: 'User created successfully!', uid });
+    console.log({ status: true, message: 'User created successfully!', uid })
   });
 };
 
@@ -39,6 +41,7 @@ const login = async (req, res) => {
   userRef.once('value', async snapshot => {
     if (!snapshot.exists()) {
       return res.status(400).json({ status: false, error: 'Invalid login credentials.' });
+       console.log({ status: false, error: 'Invalid login credentials.' })
     }
 
     const userData = snapshot.val();
@@ -48,6 +51,7 @@ const login = async (req, res) => {
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
       return res.status(400).json({ status: false, error: 'Invalid login credentials.' });
+       console.log({ status: false, error: 'Invalid login credentials.' })
     }
 
     // Generate JWT tokens
@@ -59,6 +63,7 @@ const login = async (req, res) => {
     db.ref('refreshTokens/' + uuidv4()).set(refreshTokenEntry);
 
     res.json({ status: true, message: 'Login successful!', token, refreshToken,uid:user.uid });
+     console.log({ status: true, message: 'Login successful!', token, refreshToken,uid:user.uid })
   });
 };
 
