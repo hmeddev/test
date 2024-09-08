@@ -28,6 +28,7 @@ const getUser = (req, res) => {
 
     const user = snapshot.val();
     res.json({status:true, uid: user.uid, username: user.username, role: user.role });
+    console.log({status:true, uid: user.uid, username: user.username, role: user.role })
   });
 };
 
