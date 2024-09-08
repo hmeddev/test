@@ -42,7 +42,7 @@ app.use(session({
 
 app.use('/auth', authRoutes);
 app.use('/game', gameRoutes);
-app.use('/user', loginLimiter, userRoutes);
+app.use('/user',  userRoutes);
 
 
 const PROTO_PATH = path.join(__dirname, 'service.proto');
