@@ -50,7 +50,11 @@ const packageDefinition = protoLoader.loadSync(PROTO_PATH);
 const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
 
 function myMethod(call, callback) {
-  callback(null, { ResultCode : 0, Message: 'Success' });
+  const requestData = call.request;
+
+  // قراءة البيانات من الطلب
+  console.log("Received data:", requestData);
+  callback(null, { ResultCode : 1, Message: 'Success' });
 }
 
 // // إعداد gRPC سيرفر
