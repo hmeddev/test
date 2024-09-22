@@ -8,7 +8,7 @@ const validateSignup = (req, res, next) => {
   });
 
   const { error } = schema.validate(req.body);
-  if (error) return res.status(400).json(createErrorResponse(error.details[0].message,14));
+  if (error) return res.status(400).json(createErrorResponse(error.details,14));
   
   next();
 };

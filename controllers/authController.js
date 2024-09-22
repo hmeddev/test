@@ -27,7 +27,7 @@ function formatText(input) {
 }
 // Signup controller
 const signup = async (req, res) => {
-  const { username, password,nickname } = req.body;
+  let { username, password,nickname } = req.body;
   nickname = formatText(nickname)
   username = formatText(username)
   if(!validateUsername(username).status)
@@ -63,7 +63,7 @@ const signup = async (req, res) => {
 
 // Login controller
 const login = async (req, res) => {
-  const { username, password } = req.body;
+  let { username, password } = req.body;
   username = formatText(username)
   const userRef = db.ref(path+'/users').orderByChild('username').equalTo(username);
   userRef.once('value', async snapshot => {
