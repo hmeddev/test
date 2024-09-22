@@ -4,13 +4,30 @@ const { v4: uuidv4 } = require('uuid');
 const admin = require('../firebase');
 const { createErrorResponse, createSuccessResponse,main } = require('../Handler');
 const db = admin.database();
-const path = main
+const path = main().path
+
+
+function validateUsername(username,min) {
+  const minLength = min;
+  const maxLength = 20;
+  const regex = /^[a-zA-Z0-9_.-]+$/;
+
+  if (username.length < minLength || username.length > maxLength) {
+    return "اسم المستخدم يجب أن يكون بين 5 و 20 حرفًا";
+  }
+
+  if (!regex.test(username)) {
+    return "اسم المستخدم يجب أن يحتوي فقط على أحرف وأرقام، ويمكن أن يحتوي على النقاط أو الشرطة";
+  }
+
+  return "اسم المستخدم صالح";
+}
 // Signup controller
 const signup = async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password,nickname } = req.body;
 
   // Check if user already exists
-  const userRef = db.ref('users').orderByChild('username').equalTo(username);
+  const userRef = db.ref(path+'/users').orderByChild('username').equalTo(username);
   userRef.once('value', async snapshot => {
     if (snapshot.exists()) {
       const error = createErrorResponse("Username already exists.",6)
@@ -22,11 +39,11 @@ const signup = async (req, res) => {
     const uid = uuidv4();
 
     // Save user to Firebase
-    db.ref('users/' + uid).set({
+    db.ref(path+'/users/' + uid).set({
       uid,
+      nickname,
       username,
       password: hashedPassword,
-      role: 'USER'
     });
     const data = { status: true, message: 'User created successfully!', uid }
     const res = createSuccessResponse(data)
@@ -39,7 +56,7 @@ const signup = async (req, res) => {
 const login = async (req, res) => {
   const { username, password } = req.body;
 
-  const userRef = db.ref('users').orderByChild('username').equalTo(username);
+  const userRef = db.ref(path+'/users').orderByChild('username').equalTo(username);
   userRef.once('value', async snapshot => {
     if (!snapshot.exists()) {
       const error = createErrorResponse("Invalid login credentials.",7)
@@ -61,7 +78,7 @@ const login = async (req, res) => {
 
     // Store the refresh token in the database
     const refreshTokenEntry = { token: refreshToken, uid: user.uid };
-    db.ref('refreshTokens/' + uuidv4()).set(refreshTokenEntry);
+    db.ref(path+'/refreshTokens/' + uuidv4()).set(refreshTokenEntry);
   
     
     const data = { status: true, message: 'Login successful!', token, refreshToken, uid:user.uid }
@@ -80,7 +97,7 @@ const refreshToken = (req, res) => {
   }
 
   // Check if refresh token exists in the database
-  const refreshTokenRef = db.ref('refreshTokens').orderByChild('token').equalTo(refreshToken);
+  const refreshTokenRef = db.ref(path+'/refreshTokens').orderByChild('token').equalTo(refreshToken);
   refreshTokenRef.once('value', snapshot => {
     if (!snapshot.exists()) {
       const error = createErrorResponse("Refresh token missing.",9)
@@ -112,7 +129,7 @@ const logout = (req, res) => {
   }
 
   // إبطال التوكن المتجدد في قاعدة البيانات
-  const refreshTokenRef = db.ref('refreshTokens').orderByChild('token').equalTo(refreshToken);
+  const refreshTokenRef = db.ref(path+'/refreshTokens').orderByChild('token').equalTo(refreshToken);
   refreshTokenRef.once('value', snapshot => {
     if (!snapshot.exists()) {
       const error = createErrorResponse("Invalid refresh token.",9)
@@ -121,7 +138,7 @@ const logout = (req, res) => {
 
     // إبطال التوكن (إزالته من قاعدة البيانات)
     const tokenKey = Object.keys(snapshot.val())[0];
-    db.ref('refreshTokens/' + tokenKey).remove(() => {
+    db.ref(path+'/refreshTokens/' + tokenKey).remove(() => {
       const data = { status: true, message: 'Logout successful, token invalidated!' }
     const res = createSuccessResponse(data)
       return res.json(res);

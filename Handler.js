@@ -22,6 +22,7 @@ function createSuccessResponse(data = {}) {
 function main() {
     return {
         expiresIn: "1h",
+        path:"GameBBSEmbassy"
     };
 }
 
