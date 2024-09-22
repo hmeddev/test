@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const admin = require('../firebase');
+const { createErrorResponse, createSuccessResponse } = require('../Handler');
 const db = admin.database();
 
 // Signup controller
@@ -12,8 +13,8 @@ const signup = async (req, res) => {
   const userRef = db.ref('users').orderByChild('username').equalTo(username);
   userRef.once('value', async snapshot => {
     if (snapshot.exists()) {
-      return res.status(400).json({ status: false, error: 'Username already exists.' });
-       console.log({ status: false, error: 'Username already exists.' })
+      const error = createErrorResponse("Username already exists.",6)
+      return res.status(400).json(error);
     }
 
     // Hash password
@@ -27,9 +28,10 @@ const signup = async (req, res) => {
       password: hashedPassword,
       role: 'USER'
     });
-
-    res.status(201).json({ status: true, message: 'User created successfully!', uid });
-    console.log({ status: true, message: 'User created successfully!', uid })
+    const data = { status: true, message: 'User created successfully!', uid }
+    const res = createSuccessResponse(data)
+    res.status(201).json(res);
+    
   });
 };
 
