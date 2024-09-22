@@ -7,25 +7,34 @@ const db = admin.database();
 const path = main().path
 
 
-function validateUsername(username,min) {
-  const minLength = min;
+function validateUsername(username) {
+  const minLength = 5;
   const maxLength = 20;
   const regex = /^[a-zA-Z0-9_.-]+$/;
 
   if (username.length < minLength || username.length > maxLength) {
-    return "اسم المستخدم يجب أن يكون بين 5 و 20 حرفًا";
+    return { status: false, message: 'Username must be between 5 and 20 characters long.' };;
   }
 
   if (!regex.test(username)) {
-    return "اسم المستخدم يجب أن يحتوي فقط على أحرف وأرقام، ويمكن أن يحتوي على النقاط أو الشرطة";
+    return { status: false, message: 'Username must contain only letters and numbers, and can contain dots or dashes.' };
   }
 
-  return "اسم المستخدم صالح";
+  return  { status: true, message: 'done' };
+}
+function formatText(input) {
+    return input.trim().toLowerCase();
 }
 // Signup controller
 const signup = async (req, res) => {
   const { username, password,nickname } = req.body;
-
+  nickname = formatText(nickname)
+  username = formatText(username)
+  if(!validateUsername(username).status)
+    {
+      const error = createErrorResponse(validateUsername(username).message,13)
+      return res.status(400).json(error);
+    }
   // Check if user already exists
   const userRef = db.ref(path+'/users').orderByChild('username').equalTo(username);
   userRef.once('value', async snapshot => {
@@ -55,7 +64,7 @@ const signup = async (req, res) => {
 // Login controller
 const login = async (req, res) => {
   const { username, password } = req.body;
-
+  username = formatText(username)
   const userRef = db.ref(path+'/users').orderByChild('username').equalTo(username);
   userRef.once('value', async snapshot => {
     if (!snapshot.exists()) {
