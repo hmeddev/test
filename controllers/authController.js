@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require('uuid');
 const admin = require('../firebase');
 const { createErrorResponse, createSuccessResponse,main } = require('../Handler');
 const db = admin.database();
-
+const path = main
 // Signup controller
 const signup = async (req, res) => {
   const { username, password } = req.body;
@@ -75,25 +75,29 @@ const login = async (req, res) => {
 const refreshToken = (req, res) => {
   const { refreshToken } = req.body;
   if (!refreshToken) {
-    
-    return res.status(403).json({ status: false, error: 'Refresh token missing.' });
+    const error = createErrorResponse("Refresh token missing.",8)
+    return res.status(403).json(error);
   }
 
   // Check if refresh token exists in the database
   const refreshTokenRef = db.ref('refreshTokens').orderByChild('token').equalTo(refreshToken);
   refreshTokenRef.once('value', snapshot => {
     if (!snapshot.exists()) {
-      return res.status(403).json({ status: false, error: 'Invalid refresh token.' });
+      const error = createErrorResponse("Refresh token missing.",9)
+      return res.status(403).json(error);
     }
 
     jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
       if (err) {
-        return res.status(403).json({ status: false, error: 'Invalid refresh token.' });
+        const error = createErrorResponse("Invalid refresh token.",10)
+        return res.status(403).json(error);
       }
 
       // Generate a new access token
-      const newToken = jwt.sign({ uid: user.uid, role: user.role }, process.env.JWT_SECRET, { expiresIn: '15m' });
-      res.json({ status: true, token: newToken });
+      const newToken = jwt.sign({ uid: user.uid, role: user.role }, process.env.JWT_SECRET, { expiresIn: main().expiresIn });
+      const data = { status: true,message:"Token updated", token: newToken }
+      const res = createSuccessResponse(data)
+      res.json(res);
     });
   });
 };
@@ -103,20 +107,24 @@ const logout = (req, res) => {
   const { refreshToken } = req.body;
   
   if (!refreshToken) {
-    return res.status(400).json({ status: false, error: 'Refresh token missing.' });
+    const error = createErrorResponse("Refresh token missing.",8)
+    return res.status(400).json(error);
   }
 
   // إبطال التوكن المتجدد في قاعدة البيانات
   const refreshTokenRef = db.ref('refreshTokens').orderByChild('token').equalTo(refreshToken);
   refreshTokenRef.once('value', snapshot => {
     if (!snapshot.exists()) {
-      return res.status(400).json({ status: false, error: 'Invalid refresh token.' });
+      const error = createErrorResponse("Invalid refresh token.",9)
+      return res.status(400).json(error);
     }
 
     // إبطال التوكن (إزالته من قاعدة البيانات)
     const tokenKey = Object.keys(snapshot.val())[0];
     db.ref('refreshTokens/' + tokenKey).remove(() => {
-      return res.json({ status: true, message: 'Logout successful, token invalidated!' });
+      const data = { status: true, message: 'Logout successful, token invalidated!' }
+    const res = createSuccessResponse(data)
+      return res.json(res);
     });
   });
 };
