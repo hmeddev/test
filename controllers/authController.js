@@ -55,8 +55,8 @@ const signup = async (req, res) => {
       password: hashedPassword,
     });
     const data = { status: true, message: 'User created successfully!', uid }
-    const res = createSuccessResponse(data)
-    res.status(201).json(res);
+    const resdata = createSuccessResponse(data)
+    res.status(201).json(resdata);
     
   });
 };
@@ -91,9 +91,9 @@ const login = async (req, res) => {
   
     
     const data = { status: true, message: 'Login successful!', token, refreshToken, uid:user.uid }
-    const res = createSuccessResponse(data)
+    const resresdata = createSuccessResponse(data)
     
-    res.json(res);
+    res.json(resresdata);
   });
 };
 
@@ -122,8 +122,8 @@ const refreshToken = (req, res) => {
       // Generate a new access token
       const newToken = jwt.sign({ uid: user.uid, role: user.role }, process.env.JWT_SECRET, { expiresIn: main().expiresIn });
       const data = { status: true,message:"Token updated", token: newToken }
-      const res = createSuccessResponse(data)
-      res.json(res);
+      const resresdata = createSuccessResponse(data)
+      res.json(resresdata);
     });
   });
 };
@@ -149,8 +149,8 @@ const logout = (req, res) => {
     const tokenKey = Object.keys(snapshot.val())[0];
     db.ref(path+'/refreshTokens/' + tokenKey).remove(() => {
       const data = { status: true, message: 'Logout successful, token invalidated!' }
-    const res = createSuccessResponse(data)
-      return res.json(res);
+    const resresdata = createSuccessResponse(data)
+      return res.json(resresdata);
     });
   });
 };
