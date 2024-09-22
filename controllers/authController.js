@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const admin = require('../firebase');
-const { createErrorResponse, createSuccessResponse } = require('../Handler');
+const { createErrorResponse, createSuccessResponse,main } = require('../Handler');
 const db = admin.database();
 
 // Signup controller
@@ -42,38 +42,40 @@ const login = async (req, res) => {
   const userRef = db.ref('users').orderByChild('username').equalTo(username);
   userRef.once('value', async snapshot => {
     if (!snapshot.exists()) {
-      return res.status(400).json({ status: false, error: 'Invalid login credentials.' });
-       console.log({ status: false, error: 'Invalid login credentials.' })
+      const error = createErrorResponse("Invalid login credentials.",7)
+      return res.status(400).json(error);
+       
     }
 
     const userData = snapshot.val();
-    const user = Object.values(userData)[0]; // Get the first user match
-
-    // Verify password
+    const user = Object.values(userData)[0]; 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      return res.status(400).json({ status: false, error: 'Invalid login credentials.' });
-       console.log({ status: false, error: 'Invalid login credentials.' })
+      const error = createErrorResponse("Invalid login credentials.",7)
+      return res.status(400).json(error);
     }
 
     // Generate JWT tokens
-    const token = jwt.sign({ uid: user.uid, role: user.role }, process.env.JWT_SECRET, { expiresIn: '15m' });
-    const refreshToken = jwt.sign({ uid: user.uid, role: user.role }, process.env.REFRESH_TOKEN_SECRET);
+    const token = jwt.sign({ uid: user.uid }, process.env.JWT_SECRET, { expiresIn: main().expiresIn });
+    const refreshToken = jwt.sign({ uid: user.uid }, process.env.REFRESH_TOKEN_SECRET);
 
     // Store the refresh token in the database
     const refreshTokenEntry = { token: refreshToken, uid: user.uid };
     db.ref('refreshTokens/' + uuidv4()).set(refreshTokenEntry);
-
-    res.json({ status: true, message: 'Login successful!', token, refreshToken,uid:user.uid });
-     console.log({ status: true, message: 'Login successful!', token, refreshToken,uid:user.uid })
+  
+    
+    const data = { status: true, message: 'Login successful!', token, refreshToken, uid:user.uid }
+    const res = createSuccessResponse(data)
+    
+    res.json(res);
   });
 };
 
 // Refresh token controller
 const refreshToken = (req, res) => {
-  console.log("hmed-1")
   const { refreshToken } = req.body;
   if (!refreshToken) {
+    
     return res.status(403).json({ status: false, error: 'Refresh token missing.' });
   }
 

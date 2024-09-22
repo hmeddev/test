@@ -18,8 +18,16 @@ function createSuccessResponse(data = {}) {
     };
 }
 
+
+function main() {
+    return {
+        expiresIn: "1h",
+    };
+}
+
 // تصدير الدوال
 module.exports = {
     createErrorResponse,
-    createSuccessResponse
+    createSuccessResponse,
+    main
 };
