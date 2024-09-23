@@ -2,98 +2,81 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const admin = require('../firebase/firebase');
-const { createErrorResponse, createSuccessResponse,main } = require('../lib/Handler');
+const { createErrorResponse, createSuccessResponse, main } = require('../lib/Handler');
+const ERROR_CODES = require('../lib/errorCodes');
 const db = admin.database();
-const path = main().path
+const path = main().path;
 
+const USERNAME_VALIDATION = {
+  minLength: 5,
+  maxLength: 20,
+  regex: /^[a-zA-Z0-9_.-]+$/,
+  errorMessage: {
+    length: 'Username must be between 5 and 20 characters long.',
+    format: 'Username must contain only letters, numbers, dots, or dashes.'
+  }
+};
 
-function validateUsername(username) {
-  const minLength = 5;
-  const maxLength = 20;
-  const regex = /^[a-zA-Z0-9_.-]+$/;
-
+const validateUsername = (username) => {
+  const { minLength, maxLength, regex, errorMessage } = USERNAME_VALIDATION;
   if (username.length < minLength || username.length > maxLength) {
-    return { status: false, message: 'Username must be between 5 and 20 characters long.' };;
+    return { status: false, message: errorMessage.length };
   }
-
   if (!regex.test(username)) {
-    return { status: false, message: 'Username must contain only letters and numbers, and can contain dots or dashes.' };
+    return { status: false, message: errorMessage.format };
   }
+  return { status: true, message: 'done' };
+};
 
-  return  { status: true, message: 'done' };
-}
-function formatText(input) {
-    return input.trim().toLowerCase();
-}
+const formatText = (input) => input.trim().toLowerCase();
+
 // Signup controller
 const signup = async (req, res) => {
-  let { username, password,nickname } = req.body;
-  nickname = formatText(nickname)
-  username = formatText(username)
-  if(!validateUsername(username).status)
-    {
-      const error = createErrorResponse(validateUsername(username).message,13)
-      return res.status(400).json(error);
-    }
-  // Check if user already exists
-  const userRef = db.ref(path+'/users').orderByChild('username').equalTo(username);
-  userRef.once('value', async snapshot => {
+  let { username, password, nickname } = req.body;
+  username = formatText(username);
+  nickname = formatText(nickname);
+
+  const usernameValidation = validateUsername(username);
+  if (!usernameValidation.status) {
+    return res.status(400).json(createErrorResponse(usernameValidation.message, ERROR_CODES.USERNAME_INVALID));
+  }
+
+  const userRef = db.ref(`${path}/users`).orderByChild('username').equalTo(username);
+  userRef.once('value', async (snapshot) => {
     if (snapshot.exists()) {
-      const error = createErrorResponse("Username already exists.",6)
-      return res.status(400).json(error);
+      return res.status(400).json(createErrorResponse("Username already exists.", ERROR_CODES.USER_EXISTS));
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
     const uid = uuidv4();
 
-    // Save user to Firebase
-    db.ref(path+'/users/' + uid).set({
-      uid,
-      nickname,
-      username,
-      password: hashedPassword,
-    });
-    const data = { status: true, message: 'User created successfully!', uid }
-    const resdata = createSuccessResponse(data)
-    res.status(201).json(resdata);
-    
+    await db.ref(`${path}/users/${uid}`).set({ uid, nickname, username, password: hashedPassword });
+    res.status(201).json(createSuccessResponse({ status: true, message: 'User created successfully!', uid }));
   });
 };
 
 // Login controller
 const login = async (req, res) => {
   let { username, password } = req.body;
-  username = formatText(username)
-  const userRef = db.ref(path+'/users').orderByChild('username').equalTo(username);
-  userRef.once('value', async snapshot => {
+  username = formatText(username);
+
+  const userRef = db.ref(`${path}/users`).orderByChild('username').equalTo(username);
+  userRef.once('value', async (snapshot) => {
     if (!snapshot.exists()) {
-      const error = createErrorResponse("Invalid login credentials.",7)
-      return res.status(400).json(error);
-       
+      return res.status(400).json(createErrorResponse("Invalid login credentials.", ERROR_CODES.INVALID_CREDENTIALS));
     }
 
-    const userData = snapshot.val();
-    const user = Object.values(userData)[0]; 
+    const user = Object.values(snapshot.val())[0];
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      const error = createErrorResponse("Invalid login credentials.",7)
-      return res.status(400).json(error);
+      return res.status(400).json(createErrorResponse("Invalid login credentials.", ERROR_CODES.INVALID_CREDENTIALS));
     }
 
-    // Generate JWT tokens
     const token = jwt.sign({ uid: user.uid }, process.env.JWT_SECRET, { expiresIn: main().expiresIn });
     const refreshToken = jwt.sign({ uid: user.uid }, process.env.REFRESH_TOKEN_SECRET);
 
-    // Store the refresh token in the database
-    const refreshTokenEntry = { token: refreshToken, uid: user.uid };
-    db.ref(path+'/refreshTokens/' + uuidv4()).set(refreshTokenEntry);
-  
-    
-    const data = { status: true, message: 'Login successful!', token, refreshToken, uid:user.uid }
-    const resresdata = createSuccessResponse(data)
-    
-    res.json(resresdata);
+    await db.ref(`${path}/refreshTokens/${uuidv4()}`).set({ token: refreshToken, uid: user.uid });
+    res.json(createSuccessResponse({ status: true, message: 'Login successful!', token, refreshToken, uid: user.uid }));
   });
 };
 
@@ -101,29 +84,22 @@ const login = async (req, res) => {
 const refreshToken = (req, res) => {
   const { refreshToken } = req.body;
   if (!refreshToken) {
-    const error = createErrorResponse("Refresh token missing.",8)
-    return res.status(403).json(error);
+    return res.status(403).json(createErrorResponse("Refresh token missing.", ERROR_CODES.MISSING_TOKEN));
   }
 
-  // Check if refresh token exists in the database
-  const refreshTokenRef = db.ref(path+'/refreshTokens').orderByChild('token').equalTo(refreshToken);
-  refreshTokenRef.once('value', snapshot => {
+  const refreshTokenRef = db.ref(`${path}/refreshTokens`).orderByChild('token').equalTo(refreshToken);
+  refreshTokenRef.once('value', (snapshot) => {
     if (!snapshot.exists()) {
-      const error = createErrorResponse("Refresh token missing.",9)
-      return res.status(403).json(error);
+      return res.status(403).json(createErrorResponse("Refresh token missing.", ERROR_CODES.INVALID_TOKEN));
     }
 
     jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
       if (err) {
-        const error = createErrorResponse("Invalid refresh token.",10)
-        return res.status(403).json(error);
+        return res.status(403).json(createErrorResponse("Invalid refresh token.", ERROR_CODES.INVALID_TOKEN));
       }
 
-      // Generate a new access token
-      const newToken = jwt.sign({ uid: user.uid, role: user.role }, process.env.JWT_SECRET, { expiresIn: main().expiresIn });
-      const data = { status: true,message:"Token updated", token: newToken }
-      const resresdata = createSuccessResponse(data)
-      res.json(resresdata);
+      const newToken = jwt.sign({ uid: user.uid }, process.env.JWT_SECRET, { expiresIn: main().expiresIn });
+      res.json(createSuccessResponse({ status: true, message: "Token updated", token: newToken }));
     });
   });
 };
@@ -131,26 +107,19 @@ const refreshToken = (req, res) => {
 // Logout controller
 const logout = (req, res) => {
   const { refreshToken } = req.body;
-  
   if (!refreshToken) {
-    const error = createErrorResponse("Refresh token missing.",8)
-    return res.status(400).json(error);
+    return res.status(400).json(createErrorResponse("Refresh token missing.", ERROR_CODES.MISSING_TOKEN));
   }
 
-  // إبطال التوكن المتجدد في قاعدة البيانات
-  const refreshTokenRef = db.ref(path+'/refreshTokens').orderByChild('token').equalTo(refreshToken);
-  refreshTokenRef.once('value', snapshot => {
+  const refreshTokenRef = db.ref(`${path}/refreshTokens`).orderByChild('token').equalTo(refreshToken);
+  refreshTokenRef.once('value', (snapshot) => {
     if (!snapshot.exists()) {
-      const error = createErrorResponse("Invalid refresh token.",9)
-      return res.status(400).json(error);
+      return res.status(400).json(createErrorResponse("Invalid refresh token.", ERROR_CODES.INVALID_TOKEN));
     }
 
-    // إبطال التوكن (إزالته من قاعدة البيانات)
     const tokenKey = Object.keys(snapshot.val())[0];
-    db.ref(path+'/refreshTokens/' + tokenKey).remove(() => {
-      const data = { status: true, message: 'Logout successful, token invalidated!' }
-    const resresdata = createSuccessResponse(data)
-      return res.json(resresdata);
+    db.ref(`${path}/refreshTokens/${tokenKey}`).remove(() => {
+      res.json(createSuccessResponse({ status: true, message: 'Logout successful, token invalidated!' }));
     });
   });
 };
