@@ -1,5 +1,5 @@
 const Joi = require('joi');
-const admin = require('../firebase');
+const admin = require('../firebase/firebase');
 const db = admin.database();
 
 async function validateApiKey(key) {
@@ -13,7 +13,7 @@ async function validateApiKey(key) {
   }
 }
 
-const { createErrorResponse, createSuccessResponse, main } = require('../Handler');
+const { createErrorResponse, createSuccessResponse, main } = require('../lib/Handler');
 
 const schema = (isSignup) => {
   const baseSchema = {

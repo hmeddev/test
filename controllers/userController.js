@@ -1,4 +1,4 @@
-const admin = require('../firebase');
+const admin = require('../firebase/firebase');
 const db = admin.database();
 
 // Update user controller

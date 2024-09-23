@@ -1,8 +1,8 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
-const admin = require('../firebase');
-const { createErrorResponse, createSuccessResponse,main } = require('../Handler');
+const admin = require('../firebase/firebase');
+const { createErrorResponse, createSuccessResponse,main } = require('../lib/Handler');
 const db = admin.database();
 const path = main().path
 
