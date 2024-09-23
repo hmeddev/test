@@ -1,4 +1,8 @@
 const Joi = require('joi');
+const admin = require('../firebase');
+const db = admin.database();
+
+
 const { createErrorResponse, createSuccessResponse,main } = require('../Handler');
 const validateSignup = (req, res, next) => {
   const schema = Joi.object({
@@ -26,5 +30,8 @@ const validateLogin = (req, res, next) => {
   
   next();
 };
+
+
+
 
 module.exports = { validateSignup, validateLogin };
