@@ -108,11 +108,21 @@ const refreshTokenController = (req, res) => {
         return res.status(403).json(createErrorResponse(ERROR_CODES.INVALID_TOKEN, ERROR_CODES.INVALID_TOKEN.message));
       }
 
+      // الحصول على الوقت الحالي
+      const currentTime = Math.floor(Date.now() / 1000);
+      console.log(user)
+      // التحقق من وقت انتهاء صلاحية التوكن
+      if (user.iat && user.iat > currentTime) {
+        return res.status(400).json(createErrorResponse(ERROR_CODES.TOKEN_NOT_EXPIRED, 'Token has not expired yet.'));
+      }
+
+      // إذا كان التوكن منتهي، يتم إصدار توكن جديد
       const newToken = jwt.sign({ uid: user.uid }, process.env.JWT_SECRET, { expiresIn: main().expiresIn });
       res.json(createSuccessResponse({ token: newToken }, 'Token updated'));
     });
   });
 };
+
 
 // Logout controller
 const logout = (req, res) => {
