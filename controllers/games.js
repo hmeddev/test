@@ -1,20 +1,23 @@
+// gamesController.js
+
 const admin = require('../firebase/firebase');
+const { createErrorResponse, createSuccessResponse } = require('../lib/Handler');
+const ERROR_CODES = require('../lib/errorCodes');
 const db = admin.database();
 
-// Get games controller
 const getgames = (req, res) => {
-  console.log("games");
+  console.log("Fetching games...");
   const gamesRef = db.ref('games/');
 
   gamesRef.once('value', snapshot => {
     if (!snapshot.exists()) {
-      return res.status(404).json({status: false, error: 'games not found.'});
+      return res.status(404).json(createErrorResponse(ERROR_CODES.GAMES_NOT_FOUND, ERROR_CODES.GAMES_NOT_FOUND.message));
     }
 
     const games = snapshot.val();
     
     // تحويل البيانات إلى مصفوفة إذا لم تكن مصفوفة
-    const gamesArray = Array.isArray(games) ? games : [games];
+    const gamesArray = Array.isArray(games) ? games : Object.values(games);
     
     // إضافة تسلسل لكل لعبة
     const gamesResponse = gamesArray.map((game, index) => ({
@@ -25,7 +28,7 @@ const getgames = (req, res) => {
       index: index + 1
     }));
 
-    res.json({status: true, games: gamesResponse});
+    res.json(createSuccessResponse({ games: gamesResponse }, 'Games fetched successfully.'));
   });
 };
 

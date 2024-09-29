@@ -1,3 +1,5 @@
+// authController.js
+
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
@@ -38,20 +40,24 @@ const signup = async (req, res) => {
 
   const usernameValidation = validateUsername(username);
   if (!usernameValidation.status) {
-    return res.status(400).json(createErrorResponse(usernameValidation.message, ERROR_CODES.USERNAME_INVALID));
+    return res.status(400).json(createErrorResponse(ERROR_CODES.USERNAME_INVALID, usernameValidation.message));
   }
 
   const userRef = db.ref(`${path}/users`).orderByChild('username').equalTo(username);
   userRef.once('value', async (snapshot) => {
     if (snapshot.exists()) {
-      return res.status(400).json(createErrorResponse("Username already exists.", ERROR_CODES.USER_EXISTS));
+      return res.status(400).json(createErrorResponse(ERROR_CODES.USERNAME_ALREADY_EXISTS, ERROR_CODES.USERNAME_ALREADY_EXISTS.message));
     }
 
-    const hashedPassword = await bcrypt.hash(password, 12);
-    const uid = uuidv4();
+    try {
+      const hashedPassword = await bcrypt.hash(password, 12);
+      const uid = uuidv4();
 
-    await db.ref(`${path}/users/${uid}`).set({ uid, nickname, username, password: hashedPassword });
-    res.status(201).json(createSuccessResponse({ status: true, message: 'User created successfully!', uid }));
+      await db.ref(`${path}/users/${uid}`).set({ uid, nickname, username, password: hashedPassword });
+      res.status(201).json(createSuccessResponse({ uid }, 'User created successfully!'));
+    } catch (error) {
+      res.status(500).json(createErrorResponse(ERROR_CODES.ACCOUNT_CREATION_FAILED, ERROR_CODES.ACCOUNT_CREATION_FAILED.message));
+    }
   });
 };
 
@@ -63,43 +69,47 @@ const login = async (req, res) => {
   const userRef = db.ref(`${path}/users`).orderByChild('username').equalTo(username);
   userRef.once('value', async (snapshot) => {
     if (!snapshot.exists()) {
-      return res.status(400).json(createErrorResponse("Invalid login credentials.", ERROR_CODES.INVALID_CREDENTIALS));
+      return res.status(400).json(createErrorResponse(ERROR_CODES.INVALID_LOGIN_CREDENTIALS, ERROR_CODES.INVALID_LOGIN_CREDENTIALS.message));
     }
 
     const user = Object.values(snapshot.val())[0];
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      return res.status(400).json(createErrorResponse("Invalid login credentials.", ERROR_CODES.INVALID_CREDENTIALS));
+      return res.status(400).json(createErrorResponse(ERROR_CODES.INVALID_LOGIN_CREDENTIALS, ERROR_CODES.INVALID_LOGIN_CREDENTIALS.message));
     }
 
     const token = jwt.sign({ uid: user.uid }, process.env.JWT_SECRET, { expiresIn: main().expiresIn });
     const refreshToken = jwt.sign({ uid: user.uid }, process.env.REFRESH_TOKEN_SECRET);
 
-    await db.ref(`${path}/refreshTokens/${uuidv4()}`).set({ token: refreshToken, uid: user.uid });
-    res.json(createSuccessResponse({ status: true, message: 'Login successful!', token, refreshToken, uid: user.uid }));
+    try {
+      await db.ref(`${path}/refreshTokens/${uuidv4()}`).set({ token: refreshToken, uid: user.uid });
+      res.json(createSuccessResponse({ token, refreshToken, uid: user.uid }, 'Login successful!'));
+    } catch (error) {
+      res.status(500).json(createErrorResponse(ERROR_CODES.TOKEN_RENEWAL_FAILED, ERROR_CODES.TOKEN_RENEWAL_FAILED.message));
+    }
   });
 };
 
 // Refresh token controller
-const refreshToken = (req, res) => {
+const refreshTokenController = (req, res) => {
   const { refreshToken } = req.body;
   if (!refreshToken) {
-    return res.status(403).json(createErrorResponse("Refresh token missing.", ERROR_CODES.MISSING_TOKEN));
+    return res.status(403).json(createErrorResponse(ERROR_CODES.REFRESH_TOKEN_MISSING, ERROR_CODES.REFRESH_TOKEN_MISSING.message));
   }
 
   const refreshTokenRef = db.ref(`${path}/refreshTokens`).orderByChild('token').equalTo(refreshToken);
   refreshTokenRef.once('value', (snapshot) => {
     if (!snapshot.exists()) {
-      return res.status(403).json(createErrorResponse("Refresh token missing.", ERROR_CODES.INVALID_TOKEN));
+      return res.status(403).json(createErrorResponse(ERROR_CODES.INVALID_TOKEN, ERROR_CODES.INVALID_TOKEN.message));
     }
 
     jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
       if (err) {
-        return res.status(403).json(createErrorResponse("Invalid refresh token.", ERROR_CODES.INVALID_TOKEN));
+        return res.status(403).json(createErrorResponse(ERROR_CODES.INVALID_TOKEN, ERROR_CODES.INVALID_TOKEN.message));
       }
 
       const newToken = jwt.sign({ uid: user.uid }, process.env.JWT_SECRET, { expiresIn: main().expiresIn });
-      res.json(createSuccessResponse({ status: true, message: "Token updated", token: newToken }));
+      res.json(createSuccessResponse({ token: newToken }, 'Token updated'));
     });
   });
 };
@@ -108,20 +118,23 @@ const refreshToken = (req, res) => {
 const logout = (req, res) => {
   const { refreshToken } = req.body;
   if (!refreshToken) {
-    return res.status(400).json(createErrorResponse("Refresh token missing.", ERROR_CODES.MISSING_TOKEN));
+    return res.status(400).json(createErrorResponse(ERROR_CODES.REFRESH_TOKEN_MISSING, ERROR_CODES.REFRESH_TOKEN_MISSING.message));
   }
 
   const refreshTokenRef = db.ref(`${path}/refreshTokens`).orderByChild('token').equalTo(refreshToken);
   refreshTokenRef.once('value', (snapshot) => {
     if (!snapshot.exists()) {
-      return res.status(400).json(createErrorResponse("Invalid refresh token.", ERROR_CODES.INVALID_TOKEN));
+      return res.status(400).json(createErrorResponse(ERROR_CODES.INVALID_TOKEN, ERROR_CODES.INVALID_TOKEN.message));
     }
 
     const tokenKey = Object.keys(snapshot.val())[0];
-    db.ref(`${path}/refreshTokens/${tokenKey}`).remove(() => {
-      res.json(createSuccessResponse({ status: true, message: 'Logout successful, token invalidated!' }));
+    db.ref(`${path}/refreshTokens/${tokenKey}`).remove((error) => {
+      if (error) {
+        return res.status(500).json(createErrorResponse(ERROR_CODES.GENERAL_ERROR, 'Failed to logout.'));
+      }
+      res.json(createSuccessResponse({}, 'Logout successful, token invalidated!'));
     });
   });
 };
 
-module.exports = { signup, login, refreshToken, logout };
+module.exports = { signup, login, refreshToken: refreshTokenController, logout };
