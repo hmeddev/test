@@ -28,7 +28,7 @@ const getgames = (req, res) => {
       index: index + 1
     }));
 
-    res.json(createSuccessResponse({ games: gamesResponse }, 'Games fetched successfully.'));
+    res.json(createSuccessResponse( gamesResponse , 'Games fetched successfully.'));
   });
 };
 
