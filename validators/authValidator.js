@@ -86,7 +86,7 @@ async function validateRequest(req, res, next, isSignup = true) {
     
     const errorDetails = error.details.map(detail => detail.message).join(', ');
     console.log(errorDetails)
-    return res.status(400).json(createErrorResponse(ERROR_CODES.VALIDATION_ERROR, errorDetails));
+    return res.status(400).json(createErrorResponse(ERROR_CODES.missing_ERROR, errorDetails));
   }
 
   const isValidApiKey = await validateApiKey(req.body.key);
