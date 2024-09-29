@@ -83,13 +83,13 @@ async function validateRequest(req, res, next, isSignup = true) {
   const { error } = isSignup ? signupSchema.validate(req.body, { abortEarly: false }) : loginSchema.validate(req.body, { abortEarly: false });
   
   if (error) {
+    
     const errorDetails = error.details.map(detail => detail.message).join(', ');
+    console.log(errorDetails)
     return res.status(400).json(createErrorResponse(ERROR_CODES.VALIDATION_ERROR, errorDetails));
   }
 
   const isValidApiKey = await validateApiKey(req.body.key);
-  console.log(isValidApiKey)
-  console.log(req.body.key)
   if (!isValidApiKey) {
     return res.status(400).json(createErrorResponse(ERROR_CODES.INVALID_API_KEY, ERROR_CODES.INVALID_API_KEY.message));
   }
