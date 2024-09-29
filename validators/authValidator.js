@@ -20,7 +20,7 @@ const baseSchema = {
       'string.max': 'Username يجب ألا يتجاوز 30 حرفًا.',
       'any.required': 'Username مطلوب.'
     }),
-  apikey: Joi.string()
+  key: Joi.string()
     .alphanum()
     .min(5)
     .max(30)
@@ -86,7 +86,7 @@ async function validateRequest(req, res, next, isSignup = true) {
     return res.status(400).json(createErrorResponse(ERROR_CODES.VALIDATION_ERROR, errorDetails));
   }
 
-  const isValidApiKey = await validateApiKey(req.body.apikey);
+  const isValidApiKey = await validateApiKey(req.body.key);
   if (!isValidApiKey) {
     return res.status(400).json(createErrorResponse(ERROR_CODES.INVALID_API_KEY, ERROR_CODES.INVALID_API_KEY.message));
   }
