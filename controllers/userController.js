@@ -1,10 +1,11 @@
 const admin = require('../firebase/firebase');
+const { createErrorResponse, createSuccessResponse, main } = require('../lib/Handler');
 const db = admin.database();
-
+const path = main().path;
 // Update user controller
 const updateUser = (req, res) => {
   const { username } = req.body;
-  const userRef = db.ref('users/' + req.user.uid);
+  const userRef = db.ref(path+'/users/' + req.user.uid);
 
   userRef.once('value', snapshot => {
     if (!snapshot.exists()) {
@@ -19,7 +20,7 @@ const updateUser = (req, res) => {
 
 // Get user controller
 const getUser = (req, res) => {
-  const userRef = db.ref('users/' + req.user.uid);
+  const userRef = db.ref(path+'/users/' + req.user.uid);
 console.log("user")
   userRef.once('value', snapshot => {
     if (!snapshot.exists()) {

@@ -86,7 +86,6 @@ async function validateRequest(req, res, next, isSignup = true) {
   if (error) {
     
     const errorDetails = error.details.map(detail => detail.message).join(', ');
-    console.log(errorDetails)
     return res.status(400).json(createErrorResponse(ERROR_CODES.missing_ERROR, errorDetails));
   }
 
