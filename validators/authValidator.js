@@ -14,11 +14,11 @@ const baseSchema = {
     .max(30)
     .required()
     .messages({
-      'string.base': 'Username يجب أن يكون نصًا.',
-      'string.empty': 'Username لا يمكن أن يكون فارغًا.',
-      'string.min': 'Username يجب أن يحتوي على 5 أحرف على الأقل.',
-      'string.max': 'Username يجب ألا يتجاوز 30 حرفًا.',
-      'any.required': 'Username مطلوب.'
+      'string.base': 'Username must be a string.',
+      'string.empty': 'Username cannot be empty.',
+      'string.min': 'Username must be at least 5 characters long.',
+      'string.max': 'Username cannot exceed 30 characters.',
+      'any.required': 'Username is required.'
     }),
   key: Joi.string()
     .alphanum()
@@ -26,11 +26,11 @@ const baseSchema = {
     .max(30)
     .required()
     .messages({
-      'string.base': 'API key يجب أن يكون نصًا.',
-      'string.empty': 'API key لا يمكن أن يكون فارغًا.',
-      'string.min': 'API key يجب أن يحتوي على 5 أحرف على الأقل.',
-      'string.max': 'API key يجب ألا يتجاوز 30 حرفًا.',
-      'any.required': 'API key مطلوب.'
+      'string.base': 'API key must be a string.',
+      'string.empty': 'API key cannot be empty.',
+      'string.min': 'API key must be at least 5 characters long.',
+      'string.max': 'API key cannot exceed 30 characters.',
+      'any.required': 'API key is required.'
     }),
   password: Joi.string()
     .min(8)
@@ -38,12 +38,12 @@ const baseSchema = {
     .required()
     .pattern(/^[a-zA-Z0-9!@#$%^&*()_+\-={}\[\]:;"'<>?,.\/\\|`~]+$/)
     .messages({
-      'string.base': 'Password يجب أن يكون نصًا.',
-      'string.empty': 'Password لا يمكن أن يكون فارغًا.',
-      'string.min': 'Password يجب أن يحتوي على 8 أحرف على الأقل.',
-      'string.max': 'Password يجب ألا يتجاوز 30 حرفًا.',
-      'any.required': 'Password مطلوب.',
-      'string.pattern.base': 'Password يحتوي على أحرف غير صالحة.'
+      'string.base': 'Password must be a string.',
+      'string.empty': 'Password cannot be empty.',
+      'string.min': 'Password must be at least 8 characters long.',
+      'string.max': 'Password cannot exceed 30 characters.',
+      'any.required': 'Password is required.',
+      'string.pattern.base': 'Password contains invalid characters.'
     }),
 };
 
@@ -55,13 +55,14 @@ const signupSchema = Joi.object({
     .max(30)
     .required()
     .messages({
-      'string.base': 'Nickname يجب أن يكون نصًا.',
-      'string.empty': 'Nickname لا يمكن أن يكون فارغًا.',
-      'string.min': 'Nickname يجب أن يحتوي على 5 أحرف على الأقل.',
-      'string.max': 'Nickname يجب ألا يتجاوز 30 حرفًا.',
-      'any.required': 'Nickname مطلوب.'
+      'string.base': 'Nickname must be a string.',
+      'string.empty': 'Nickname cannot be empty.',
+      'string.min': 'Nickname must be at least 5 characters long.',
+      'string.max': 'Nickname cannot exceed 30 characters.',
+      'any.required': 'Nickname is required.'
     }),
 });
+
 
 const loginSchema = Joi.object(baseSchema);
 
