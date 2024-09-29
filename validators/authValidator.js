@@ -68,6 +68,7 @@ const loginSchema = Joi.object(baseSchema);
 // دالة التحقق من مفتاح API
 async function validateApiKey(key) {
   try {
+    console.log(key)
     const ref = db.ref(`BOTONE/APIKEY/${key}`);
     const snapshot = await ref.once('value');
     return snapshot.exists();
@@ -87,6 +88,8 @@ async function validateRequest(req, res, next, isSignup = true) {
   }
 
   const isValidApiKey = await validateApiKey(req.body.key);
+  console.log(isValidApiKey)
+  console.log(req.body.key)
   if (!isValidApiKey) {
     return res.status(400).json(createErrorResponse(ERROR_CODES.INVALID_API_KEY, ERROR_CODES.INVALID_API_KEY.message));
   }
