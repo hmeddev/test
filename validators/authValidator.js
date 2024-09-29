@@ -4,6 +4,7 @@ const Joi = require('joi');
 const admin = require('../firebase/firebase');
 const db = admin.database();
 const { createErrorResponse } = require('../lib/Handler');
+const ERROR_CODES = require('../lib/errorCodes');
 
 // تعريف Schema بشكل منفصل
 const baseSchema = {
@@ -81,13 +82,13 @@ async function validateRequest(req, res, next, isSignup = true) {
   const { error } = isSignup ? signupSchema.validate(req.body, { abortEarly: false }) : loginSchema.validate(req.body, { abortEarly: false });
   
   if (error) {
-    const errorDetails = error.details.map(detail => detail.message);
-    return res.status(400).json(createErrorResponse(errorDetails, isSignup ? 14 : 15));
+    const errorDetails = error.details.map(detail => detail.message).join(', ');
+    return res.status(400).json(createErrorResponse(ERROR_CODES.VALIDATION_ERROR, errorDetails));
   }
 
   const isValidApiKey = await validateApiKey(req.body.apikey);
   if (!isValidApiKey) {
-    return res.status(400).json(createErrorResponse('Invalid API key', isSignup ? 16 : 17));
+    return res.status(400).json(createErrorResponse(ERROR_CODES.INVALID_API_KEY, ERROR_CODES.INVALID_API_KEY.message));
   }
 
   next();
