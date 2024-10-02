@@ -5,9 +5,9 @@ const { createErrorResponse, createSuccessResponse,main } = require('../lib/Hand
 const ERROR_CODES = require('../lib/errorCodes');
 const db = admin.database();
 const path = main().path;
-const getgames = (req, res) => {
-  console.log("Fetching games...");
-  const gamesRef = db.ref('games/');
+const getitems = (req, res) => {
+  console.log("Fetching items...");
+  const gamesRef = db.ref(path+'/items/');
 
   gamesRef.once('value', snapshot => {
     if (!snapshot.exists()) {
@@ -30,6 +30,6 @@ const getgames = (req, res) => {
 
     res.json(createSuccessResponse({ games: gamesResponse }, 'Games fetched successfully.'));
   });
-};
-
-module.exports = { getgames };
+}
+  
+  module.exports = { getitems };
