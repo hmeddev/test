@@ -1,4 +1,4 @@
-// gamesController.js
+// itemsController.js
 
 const admin = require('../firebase/firebase');
 const { createErrorResponse, createSuccessResponse,main } = require('../lib/Handler');
@@ -7,28 +7,34 @@ const db = admin.database();
 const path = main().path;
 const getitems = (req, res) => {
   console.log("Fetching items...");
-  const gamesRef = db.ref(path+'/items/');
+  const itemsRef = db.ref(path+'/items/');
 
-  gamesRef.once('value', snapshot => {
+  itemsRef.once('value', snapshot => {
     if (!snapshot.exists()) {
       return res.status(404).json(createErrorResponse(ERROR_CODES.GAMES_NOT_FOUND, ERROR_CODES.GAMES_NOT_FOUND.message));
     }
 
-    const games = snapshot.val();
+    const items = snapshot.val();
     
     // تحويل البيانات إلى مصفوفة إذا لم تكن مصفوفة
-    const gamesArray = Array.isArray(games) ? games : Object.values(games);
+    const itemsArray = Array.isArray(items) ? items : Object.values(items);
     
     // إضافة تسلسل لكل لعبة
-    const gamesResponse = gamesArray.map((game, index) => ({
-      title: game.title || 'No title',
-      description: game.description || 'No description',
-      img: game.img || 'No image',
-      key: game.key || 'No key',
+    const itemsResponse = itemsArray.map((items, index) => ({
+      name: items.name || 'No name',
+      description: items.description || 'No description',
+      icon: items.icon || 'No image',
+      key: items.key || 'No key',
+      group: items.group || 'No group',
+      groupid: items.groupid || 'No groupid',
+      id: items.id || 'No id',
+      rarity: items.rarity || 'No rarity',
+      time: items.time || 'No time',
+      type: items.type || 'No type',
       index: index + 1
     }));
 
-    res.json(createSuccessResponse({ games: gamesResponse }, 'Games fetched successfully.'));
+    res.json(createSuccessResponse({ items: itemsResponse }, 'items fetched successfully.'));
   });
 }
   
