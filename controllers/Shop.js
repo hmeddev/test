@@ -27,7 +27,7 @@ const getShop = (req, res) => {
       key: Shop.key || 'No key',
       group: Shop.group || 'No group',
       groupid: Shop.groupid || 'No groupid',
-      id: Shop.id || 'No id',
+      id: Shop.id,//|| 'No id',
       rarity: Shop.rarity || 'No rarity',
       time: Shop.time || 'No time',
       type: Shop.type || 'No type',
