@@ -7,5 +7,5 @@ const router = express.Router();
 
 router.get('/games', authenticate, getgames);
 router.get('/items', authenticate, getitems);
-router.get('/Shop', authenticate, getShop);
+router.get('/shop', authenticate, getShop);
 module.exports = router;

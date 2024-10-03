@@ -34,7 +34,7 @@ const getShop = (req, res) => {
       index: index + 1
     }));
 
-    res.json(createSuccessResponse({ Shop: ShopResponse }, 'Shop fetched successfully.'));
+    res.json(createSuccessResponse({ items: ShopResponse }, 'Shop fetched successfully.'));
   });
 }
   
