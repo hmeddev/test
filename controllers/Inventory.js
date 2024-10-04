@@ -9,7 +9,7 @@ const path = main().path;
 
 
 const getInventory = (req, res) => {
-  console.log("Fetching items...");
+  console.log("Fetching inventory ...");
   
   
   const itemsRef = db.ref(path+'/items/');

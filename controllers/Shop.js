@@ -6,6 +6,7 @@ const ERROR_CODES = require('../lib/errorCodes');
 const db = admin.database();
 const path = main().path;
 const getShop = (req, res) => {
+  
   console.log("Fetching Shop...");
   const ShopRef = db.ref(path+'/items/');
 
@@ -37,6 +38,7 @@ const getShop = (req, res) => {
 
     res.json(createSuccessResponse({ items: ShopResponse }, 'Shop fetched successfully.'));
   });
+  
 }
   
   module.exports = { getShop };
