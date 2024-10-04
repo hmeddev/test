@@ -32,7 +32,7 @@ const getInventory = (req, res) => {
       key: items.key || 'No key',
       group: items.group || 'No group',
       groupid: items.groupid || 'No groupid',
-      id: items.id || 'No id',
+      id: items.id ,
       rarity: items.rarity || 'No rarity',
       time: items.time || 'No time',
       type: items.type || 'No type',
