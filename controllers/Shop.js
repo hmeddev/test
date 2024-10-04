@@ -31,6 +31,7 @@ const getShop = (req, res) => {
       rarity: Shop.rarity || 'No rarity',
       time: Shop.time || 'No time',
       type: Shop.type || 'No type',
+      own:false,
       index: index + 1
     }));
 

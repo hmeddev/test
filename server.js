@@ -7,6 +7,7 @@ const csrf = require('csurf');
 const { loginLimiter } = require('./middlewares/rateLimit');
 const authRoutes = require('./routes/auth');
 const gameRoutes = require('./routes/game');
+const playerRoutes = require('./routes/player');
 const userRoutes = require('./routes/user');
 
 const path = require('path');
@@ -40,6 +41,7 @@ app.use(session({
 
 app.use('/auth', authRoutes);
 app.use('/game', gameRoutes);
+app.use('/player', playerRoutes);
 app.use('/user',  userRoutes);
 
 
