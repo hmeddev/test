@@ -29,7 +29,7 @@ console.log("user")
     }
 
     const user = snapshot.val();
-    res.json({status:true, uid: user.uid, username: user.username, role: user.role });
+    res.json({status:true, uid: user.uid, username: user.username, coin:1000000});
     console.log("user-done")
   });
 };
