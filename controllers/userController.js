@@ -1,6 +1,6 @@
 const admin = require('../firebase/firebase');
 const { createErrorResponse, createSuccessResponse, main } = require('../lib/Handler');
-const ERROR_CODES = require('../lib/ERROR_CODES');
+const ERROR_CODES = require('../lib/errorCodes');
 const db = admin.database();
 const path = main().path;
 
