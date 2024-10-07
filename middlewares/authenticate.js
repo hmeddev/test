@@ -18,7 +18,7 @@ function getClientIp(req) {
     // إذا لم يكن هناك وكيل عكسي
     return req.ip || req.connection.remoteAddress;
 }
-   const xForwardedFor = req.headers['User-Agent'];
+   const xForwardedFor = req.headers;
 console.log(getClientIp(req))
   console.log(xForwardedFor)
   if (!authHeader) {
