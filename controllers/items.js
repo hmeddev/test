@@ -6,6 +6,8 @@ const ERROR_CODES = require('../lib/errorCodes');
 const db = admin.database();
 const path = main().path;
 const getitems = (req, res) => {
+  const ip = req.ip || req.connection.remoteAddress;
+  console.log(ip)
   console.log("Fetching items...");
   const itemsRef = db.ref(path+'/items/');
 

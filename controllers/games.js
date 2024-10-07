@@ -6,6 +6,19 @@ const ERROR_CODES = require('../lib/errorCodes');
 const db = admin.database();
 const path = main().path;
 const getgames = (req, res) => {
+// الحصول على عنوان IP من رؤوس الطلب
+function getClientIp(req) {
+    // إذا كان التطبيق خلف وكيل عكسي مثل Nginx
+    const xForwardedFor = req.headers['x-forwarded-for'];
+    if (xForwardedFor) {
+        // يمكن أن يحتوي على سلسلة من عناوين IP، نستخدم الأول منها
+        const ips = xForwardedFor.split(',').map(ip => ip.trim());
+        return ips[0];
+    }
+    // إذا لم يكن هناك وكيل عكسي
+    return req.ip || req.connection.remoteAddress;
+}
+console.log(getClientIp(req))
   console.log("Fetching games...");
   const gamesRef = db.ref('games/');
 
