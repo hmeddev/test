@@ -9,6 +9,7 @@ const authRoutes = require('./routes/auth');
 const gameRoutes = require('./routes/game');
 const playerRoutes = require('./routes/player');
 const userRoutes = require('./routes/user');
+const keepRoutes = require('./routes/keep');
 
 const path = require('path');
 
@@ -43,6 +44,7 @@ app.use('/auth', authRoutes);
 app.use('/game', gameRoutes);
 app.use('/player', playerRoutes);
 app.use('/user',  userRoutes);
+app.use('/keep',  keepRoutes);
 
 
 
